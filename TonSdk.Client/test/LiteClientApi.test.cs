@@ -64,7 +64,7 @@ public class DevelopmentTests
     [Test]
     public async Task Test_GetTransactions()
     {
-        var result = await _client.GetTransactions(new Address("EQCwHyzOrKP1lBHbvMrFHChifc1TLgeJVpKgHpL9sluHU-gV"), 10, 20075201000003, "KC2THpE1CsLKCUJQj/CVtzZ1gTPt/Ho36h8bwIlcyII=");
+        var result = await _client.GetTransactions(address: new Address("EQCwHyzOrKP1lBHbvMrFHChifc1TLgeJVpKgHpL9sluHU-gV"), limit: 10, lt: 20075201000003, hash: "KC2THpE1CsLKCUJQj/CVtzZ1gTPt/Ho36h8bwIlcyII=");
         Console.WriteLine(JsonConvert.SerializeObject(result));
     }
     

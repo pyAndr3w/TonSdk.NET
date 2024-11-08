@@ -93,15 +93,26 @@ namespace TonSdk.Client
         /// <summary>
         /// Retrieves transaction information for the specified address.
         /// </summary>
-        /// <param name="address">The address object to retrieve transaction information for.</param>
+        /// <param name="address">The address object to retrieve transaction information for (optional for <c>HTTP_TONCENTERAPIV3</c>).</param>
+        /// <param name="workchain">Block workchain (optional).</param>
+        /// <param name="shard">Block shard id. Must be sent with workchain (optional).</param>
+        /// <param name="seqno">Block block seqno. Must be sent with workchain and shard (optional).</param>
         /// <param name="limit">The maximum number of transactions to retrieve (default: 10).</param>
         /// <param name="lt">The logical time of the transaction to start retrieving from (optional).</param>
         /// <param name="hash">The hash of the transaction to start retrieving from (optional).</param>
         /// <param name="to_lt">The logical time of the transaction to retrieve up to (optional).</param>
         /// <param name="archival">Specifies whether to retrieve transactions from archival nodes (optional).</param>
         /// <returns>An array of transaction information results.</returns>
-        Task<TransactionsInformationResult[]> GetTransactions(Address address, uint limit = 10,
-            ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null);
+        Task<TransactionsInformationResult[]> GetTransactions(
+            Address address = null,
+            int? workchain = null,
+            long? shard = null,
+            long? seqno = null,
+            uint limit = 10,
+            ulong? lt = null,
+            string hash = null,
+            ulong? to_lt = null,
+            bool? archival = null);
 
         /// <summary>
         /// Executes a specific method on the specified address.

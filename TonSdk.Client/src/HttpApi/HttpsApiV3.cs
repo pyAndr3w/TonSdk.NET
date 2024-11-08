@@ -112,30 +112,11 @@ namespace TonSdk.Client
             return new ShardsInformationResult(JsonConvert.DeserializeObject<OutV3ShardsInformationResult>(result));
         }
         
-        internal async Task<TransactionsInformationResult[]> GetTransactions(Address address, uint limit = 10,
-            ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null)
+        internal async Task<TransactionsInformationResult[]> GetTransactions(Address address = null,
+            int? workchain = null, long? shard = null, long? seqno = null, 
+            uint limit = 10, ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null)
         {
-            var dict = new Dictionary<string, object>()
-            {
-                {
-                    "account", address.ToString()
-                },
-                {
-                    "offset", "0"
-                },
-                {
-                    "limit", limit.ToString()
-                },
-                {
-                    "sort", "desc"
-                }
-            };
-
-            if (lt != null) 
-                dict.Add("start_lt", lt.ToString());
-            if (to_lt != null) 
-                dict.Add("end_lt", to_lt.ToString());
-
+            var dict = BuildGetTransactionsRequestParameters(workchain, shard, seqno, address, hash, lt, to_lt, limit);
             string result = await new TonRequestV3(new RequestParametersV3("transactions", dict), _httpClient).CallGet();
             
             var data = JsonConvert.DeserializeObject<RootTransactions>(result).Transactions;
@@ -154,31 +135,7 @@ namespace TonSdk.Client
         {
             try
             {
-                var dict = new Dictionary<string, object>()
-                {
-                    {
-                        "workchain", workchain.ToString()
-                    },
-                    {
-                        "shard", shard.ToString("X")
-                    },
-                    {
-                        "seqno", seqno.ToString()
-                    },
-                    {
-                        "offset", "0"
-                    },
-                    {
-                        "limit", count != null ? count.ToString() : "10"
-                    },
-                    {
-                        "sort", "desc"
-                    }
-                };
-
-                if (afterLt != null) 
-                    dict.Add("start_lt", afterLt.ToString());
-
+                var dict = BuildGetTransactionsRequestParameters(workchain: workchain, shard: shard, seqno: seqno, startLt: afterLt, limit: count ?? 10);
                 string result = await new TonRequestV3(new RequestParametersV3("transactions", dict), _httpClient).CallGet();
             
                 var data = JsonConvert.DeserializeObject<RootBlockTransactions>(result).Transactions;
@@ -268,6 +225,40 @@ namespace TonSdk.Client
             }), _httpClient).CallPost();
             
             return JsonConvert.DeserializeObject<EstimateFeeResultExtended>(result);
+        }
+        
+        private Dictionary<string, object> BuildGetTransactionsRequestParameters(
+            int? workchain = null,
+            long? shard = null,
+            long? seqno = null,
+            Address address = null,
+            string hash = null,
+            ulong? startLt = null,
+            ulong? endLt = null,
+            uint limit = 10,
+            int offset = 0,
+            SortDirection sort = SortDirection.DESC)
+        {
+            var queryParameters = new Dictionary<string, object>
+            {
+                { "offset", offset.ToString() },
+                { "limit", limit.ToString() },
+                { "sort", sort.ToString().ToLower() }
+            };
+
+            if (workchain.HasValue) queryParameters.Add("workchain", workchain.ToString());
+            if (shard.HasValue) queryParameters.Add("shard", shard.Value.ToString("X"));
+            if (seqno.HasValue) queryParameters.Add("seqno", seqno.ToString());
+
+            if (address != null)
+                queryParameters.Add("account", address.ToString(AddressType.Raw));
+
+            if (!string.IsNullOrEmpty(hash)) queryParameters.Add("hash", hash);
+            
+            if (startLt != null) queryParameters.Add("start_lt", startLt.ToString());
+            if (endLt != null) queryParameters.Add("end_lt", endLt.ToString());
+
+            return queryParameters;
         }
 
         public async Task<string> CustomGetMethodCall(string request, List<string[]> body)

@@ -249,24 +249,31 @@ namespace TonSdk.Client
         /// <summary>
         /// Retrieves transaction information for the specified address.
         /// </summary>
-        /// <param name="address">The address object to retrieve transaction information for.</param>
+        /// <param name="address">The address object to retrieve transaction information for (optional for <c>HTTP_TONCENTERAPIV3</c>).</param>
+        /// <param name="workchain">Block workchain (optional).</param>
+        /// <param name="shard">Block shard id. Must be sent with workchain (optional).</param>
+        /// <param name="seqno">Block block seqno. Must be sent with workchain and shard (optional).</param>
         /// <param name="limit">The maximum number of transactions to retrieve (default: 10).</param>
         /// <param name="lt">The logical time of the transaction to start retrieving from (optional).</param>
         /// <param name="hash">The hash of the transaction to start retrieving from (optional).</param>
         /// <param name="to_lt">The logical time of the transaction to retrieve up to (optional).</param>
         /// <param name="archival">Specifies whether to retrieve transactions from archival nodes (optional).</param>
         /// <returns>An array of transaction information results.</returns>
-        public async Task<TransactionsInformationResult[]?> GetTransactions(Address address, uint limit = 10,
-            ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null)
+        public async Task<TransactionsInformationResult[]> GetTransactions(Address address = null,
+            int? workchain = null, long? shard = null, long? seqno = null, 
+            uint limit = 10, ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null)
         {
             if(_type == TonClientType.LITECLIENT &&  (lt == null || hash == null))
                 throw new ArgumentException("From lt and hash, must be defined for LiteClient type.");
+            
+            if (_type != TonClientType.HTTP_TONCENTERAPIV3 && (workchain != null || shard != null || seqno != null))
+                throw new ArgumentException($"Workchain, shard and seqno parameters are not supported for {_type} client type.");
             
             return _type switch
             {
                 TonClientType.HTTP_TONCENTERAPIV2 => await _httpApi.GetTransactions(address, limit, lt, hash, to_lt, archival),
                 TonClientType.HTTP_TONWHALESAPI => await _httpWhales.GetTransactions(address, limit, lt, hash, to_lt, archival),
-                TonClientType.HTTP_TONCENTERAPIV3 => await _httpApiV3.GetTransactions(address, limit, lt, hash, to_lt, archival),
+                TonClientType.HTTP_TONCENTERAPIV3 => await _httpApiV3.GetTransactions(address, workchain, shard, seqno, limit, lt, hash, to_lt, archival),
                 TonClientType.LITECLIENT => await _liteClientApi.GetTransactions(address, limit, (long)lt, hash),
                 _ => null
             };

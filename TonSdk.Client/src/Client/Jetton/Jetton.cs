@@ -136,7 +136,7 @@ namespace TonSdk.Client
         /// <returns>An array of parsed jetton transactions.</returns>
         public async Task<IJettonTransaction[]> GetTransactions(Address jettonWallet, int limit = 5, uint? decimals = null, BlockIdExtended? block = null)
         {
-            TransactionsInformationResult[] transactionsInformationResults = await client.GetTransactions(jettonWallet, (uint)limit);
+            TransactionsInformationResult[] transactionsInformationResults = await client.GetTransactions(address: jettonWallet, limit: (uint)limit);
             uint jettonDecimals = decimals ?? await GetDecimalsByWallet(jettonWallet, block);
 
             IJettonTransaction[] parsedTransactions = new IJettonTransaction[transactionsInformationResults.Length];

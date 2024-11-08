@@ -340,6 +340,9 @@ namespace TonSdk.Client
         {
             try
             {
+                if (address is null)
+                    throw new ArgumentException($"Address must be defined for {nameof(TonClientType.LITECLIENT)} client type.");
+                
                 var result = new List<TransactionsInformationResult>();
                 await Init();
 

@@ -132,6 +132,9 @@ namespace TonSdk.Client
         internal async Task<TransactionsInformationResult[]> GetTransactions(Address address, uint limit = 10,
             ulong? lt = null, string hash = null, ulong? to_lt = null, bool? archival = null)
         {
+            if (address is null)
+                throw new ArgumentException($"Address must be defined for {nameof(TonClientType.HTTP_TONWHALESAPI)} client type.");
+            
             InTransactionsBody requestBody = new InTransactionsBody()
             {
                 address = address.ToString(AddressType.Base64, new AddressStringifyOptions(true, false, false)),

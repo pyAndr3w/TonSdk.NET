@@ -15,6 +15,12 @@ namespace TonSdk.Client
         LITECLIENT,
         
     }
+
+    public enum SortDirection
+    {
+        ASC,
+        DESC
+    }
     
     public interface ITonClientOptions {}
 
