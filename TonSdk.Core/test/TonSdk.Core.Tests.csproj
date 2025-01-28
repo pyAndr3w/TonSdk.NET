@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <RootNamespace>TonSdk.Core.Tests</RootNamespace>
 
+        <InvariantGlobalization>true</InvariantGlobalization>
+      
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>

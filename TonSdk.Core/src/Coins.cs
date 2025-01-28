@@ -256,12 +256,26 @@ namespace TonSdk.Core {
                     result = (decimal)doubleValue;
                     return true;
                 }
+            }
+            catch (CultureNotFoundException)
+            {
+                if (decimal.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out result))
+                {
+                    return true;
+                }
 
-                return false;
+                double doubleValue;
+                if (double.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out doubleValue))
+                {
+                    result = (decimal)doubleValue;
+                    return true;
+                }
             }
             catch {
                 return false;
             }
+
+            return false;
         }
 
         private static bool IsCoins(object value) {
@@ -269,12 +283,21 @@ namespace TonSdk.Core {
         }
 
         private static int GetDigitsAfterDecimalPoint(decimal number) {
-            string[] parts = number.ToString(new CultureInfo("en-US")).Split('.');
-            if (parts.Length == 2) {
-                return parts[1].Length;
+            try
+            {
+                string[] parts = number.ToString(new CultureInfo("en-US")).Split('.');
+                if (parts.Length == 2)
+                    return parts[1].Length;
+                else
+                    return 0;
             }
-            else {
-                return 0;
+            catch (CultureNotFoundException)
+            {
+                string[] parts = number.ToString(CultureInfo.InvariantCulture).Split('.');
+                if (parts.Length == 2)
+                    return parts[1].Length;
+                else
+                    return 0;
             }
         }
 
