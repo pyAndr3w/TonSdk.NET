@@ -116,13 +116,13 @@ namespace TonSdk.Connect
         {
             try
             {
-                _gateway.Pause();
                 DisconnectRpcRequest request = new DisconnectRpcRequest()
                 {
                     method = "disconnect",
                     @params = Array.Empty<string>(),
                 };
                 JObject result = await SendRequest(request, RemoveSession).ConfigureAwait(false);
+                _gateway.Pause();
             }
             catch (Exception ex)
             {
