@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using TonSdk.Core;
 using TonSdk.Core.Block;
@@ -15,7 +17,7 @@ namespace TonSdk.Client
         public int? Timeout { get; set; }
         public string ApiKey { get; set; }
     }
-
+    
     public class HttpApi : IDisposable
     {
         private readonly HttpClient _httpClient;
@@ -27,7 +29,35 @@ namespace TonSdk.Client
                 throw new ArgumentNullException("Endpoint field in Http options cannot be null.");
             }
 
-            _httpClient = new HttpClient();
+            if (httpApiParameters.Proxy != null)
+            {
+                WebProxy webProxy = new WebProxy
+                {
+                    Address = new Uri( httpApiParameters.Proxy.ProxyType switch
+                    {
+                        ProxyType.HTTP => "http://" + httpApiParameters.Proxy.Ip + ":" + httpApiParameters.Proxy.Port,
+                        ProxyType.HTTPS => "https://" + httpApiParameters.Proxy.Ip + ":" + httpApiParameters.Proxy.Port,
+                        ProxyType.Socks4 => "socks4://" + httpApiParameters.Proxy.Ip + ":" + httpApiParameters.Proxy.Port,
+                        ProxyType.Socks5 => "socks5://" + httpApiParameters.Proxy.Ip + ":" + httpApiParameters.Proxy.Port,
+                        _ => throw new ArgumentOutOfRangeException()
+                    }),
+                    Credentials = new NetworkCredential(
+                        userName: httpApiParameters.Proxy.UserName,
+                        password: httpApiParameters.Proxy.Password
+                    )
+                };
+                HttpClientHandler httpClientHandler = new HttpClientHandler
+                {
+                    Proxy = webProxy
+                };
+
+                _httpClient = new HttpClient(httpClientHandler);
+                
+            }
+            else
+            {
+                _httpClient = new HttpClient();
+            }
 
             _httpClient.Timeout = TimeSpan.FromMilliseconds(Convert.ToDouble(httpApiParameters.Timeout ?? 30000));
             //httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
